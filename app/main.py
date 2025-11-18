@@ -3,9 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqladmin import Admin
 from app.admin.views import AdminPermission, AdminRole, AdminUser
 from app.database import engine
+from app.users.router import router as router_user
+
 
 app = FastAPI()
-
+app.include_router(router_user)
 admin_panel = Admin(app, engine, title="Admin Panel")
 
 admin_panel.add_view(AdminUser)
