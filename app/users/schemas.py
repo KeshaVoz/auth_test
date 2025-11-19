@@ -2,6 +2,7 @@ from enum import Enum
 from typing import List, Optional
 import uuid
 from pydantic import BaseModel, EmailStr, Field
+
 class SRoleEnum(str, Enum):
     SUPERUSER = "SuperUser"
     ADMIN = "Admin"

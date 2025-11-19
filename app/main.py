@@ -1,13 +1,19 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, HTTPException, Request, status
+from fastapi.responses import RedirectResponse
 from sqladmin import Admin
-from app.admin.views import AdminPermission, AdminRole, AdminUser
 from app.database import engine
+from app.admin.views import AdminUser, AdminRole, AdminPermission
 from app.users.router import router as router_user
-
+from app.pages.router import router as router_pages
+from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 app.include_router(router_user)
+app.include_router(router_pages)
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
+
 admin_panel = Admin(app, engine, title="Admin Panel")
 
 admin_panel.add_view(AdminUser)
@@ -31,3 +37,8 @@ app.add_middleware(
 @app.get("/")
 async def root():
     return {"message": "API is running"}
+
+@app.exception_handler(HTTPException)
+async def auth_exception_handler(request: Request, exc: HTTPException):
+    if exc.status_code == status.HTTP_401_UNAUTHORIZED:
+        return RedirectResponse(url="/front/t_login", status_code=status.HTTP_303_SEE_OTHER)

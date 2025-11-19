@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Know Your Lucky Number - Login Page</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='login.css') }}">
+</head>
+<body>
+    <div class="login-container">
+        <h2>Log In</h2>
+        <form action="/login" method="POST">
+            <input type="email" name="email" placeholder="Enter email" required>
+            <input type="password" name="password" placeholder="Enter password" required>
+            <button type="submit">Log In</button>
+        </form>
+        <a href="/front/t_reg" class="register-link">Register</a>
+    </div>
+</body>
+</html>

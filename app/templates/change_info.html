@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Change User Info</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='change_info.css') }}" />
+</head>
+<body>
+    <div class="form-container">
+        <h2>Change User Info</h2>
+        <form id="changeForm">
+            <label for="first_name">First Name:</label>
+            <input type="text" id="first_name" name="first_name" value="{{ user.first_name }}" required />
+
+            <label for="last_name">Last Name:</label>
+            <input type="text" id="last_name" name="last_name" value="{{ user.last_name }}" required />
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" value="{{ user.email }}" required />
+
+            <button type="submit">Change</button>
+        </form>
+    </div>
+
+    <script>
+    document.getElementById('changeForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        const response = await fetch('/my_info/change', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data),
+        });
+
+        if (response.ok) {
+            window.location.href = '/front/my_info/';
+        } else {
+            alert('Error with sending user info');
+        }
+    });
+    </script>
+</body>
+</html>

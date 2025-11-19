@@ -53,6 +53,9 @@ class User(Base):
     @user_data.setter
     def user_data(self, value):
         raise AttributeError("UPDATING THIS PROPERTY IS FORBIDDEN!!11!")
+    
+    def __str__(self):
+        return f'User {self.email}'
 
 
 class Role(Base):
