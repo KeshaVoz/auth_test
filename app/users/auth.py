@@ -1,3 +1,4 @@
+from fastapi import HTTPException, status
 from passlib.context import CryptContext
 from datetime import datetime, timezone, timedelta
 import jwt
@@ -25,5 +26,5 @@ def create_access_token(data: dict) -> str:
 async def authenticate_user(email: EmailStr, password:str):
     user = await UserDAO.find_one_or_none(email=email)
     if not user or not verify_password(password, user.hashed_password):
-        return None
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication credentials were not provided or invalid.")
     return user

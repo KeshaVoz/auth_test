@@ -42,7 +42,7 @@ class User(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     role_id: Mapped[uuid.UUID] = mapped_column(ForeignKey('roles.id'))
-    role: Mapped["Role"] = relationship('Role', back_populates='users')
+    role: Mapped["Role"] = relationship('Role', back_populates='users', lazy='selectin')
 
     @property
     def user_data(self) -> int:
@@ -54,8 +54,15 @@ class User(Base):
     def user_data(self, value):
         raise AttributeError("UPDATING THIS PROPERTY IS FORBIDDEN!!11!")
     
-    def __str__(self):
-        return f'User {self.email}'
+    @property
+    def admin_data(self) -> int:
+        if not hasattr(self, '_admin_data'):
+            self._admin_data = 'DATA FOR ADMINS ONLY'
+        return self._admin_data
+
+    @admin_data.setter
+    def admin_data(self, value):
+        raise AttributeError("UPDATING THIS PROPERTY IS FORBIDDEN!!11!")
 
 
 class Role(Base):
@@ -65,8 +72,8 @@ class Role(Base):
     name: Mapped[str] = mapped_column(nullable=False, unique=True)
     description: Mapped[str] = mapped_column(nullable=True)
 
-    users: Mapped[List[User]] = relationship('User', back_populates='role', lazy='joined')
-    permissions: Mapped[List["Permission"]] = relationship('Permission', secondary='role_permissions', back_populates='roles', lazy='joined')
+    users: Mapped[List[User]] = relationship('User', back_populates='role', lazy='selectin')
+    permissions: Mapped[List["Permission"]] = relationship('Permission', secondary='role_permissions', back_populates='roles', lazy='selectin')
 
     def __str__(self):
         return f'Role {self.name}'
@@ -79,7 +86,7 @@ class Permission(Base):
     resource: Mapped[str] = mapped_column(nullable=False)
     action: Mapped[str] = mapped_column(nullable=False)
 
-    roles: Mapped[List[Role]] = relationship('Role', secondary='role_permissions', back_populates='permissions', lazy='joined')
+    roles: Mapped[List[Role]] = relationship('Role', secondary='role_permissions', back_populates='permissions', lazy='selectin')
 
     def __str__(self):
         return f'Permission {self.resource} {self.action}'

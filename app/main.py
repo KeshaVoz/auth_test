@@ -7,6 +7,7 @@ from app.users.router import router as router_user
 from app.pages.router import router as router_pages
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from app.admin.auth import authentication_backend
 
 app = FastAPI()
 app.include_router(router_user)
@@ -14,7 +15,7 @@ app.include_router(router_pages)
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 
-admin_panel = Admin(app, engine, title="Admin Panel")
+admin_panel = Admin(app, engine, title="Admin Panel", authentication_backend=authentication_backend)
 
 admin_panel.add_view(AdminUser)
 admin_panel.add_view(AdminRole)
@@ -31,7 +32,6 @@ app.add_middleware(
     allow_methods=["GET", "POST", "OPTIONS", "DELETE", "PATCH", "PUT"],
     allow_headers=["Accept", "Accept-Language", "Content-Language", "Content-Type", "Authorization", "Cookie", "Set-Cookie", "Access-Control-Allow-Headers", "Access-Control-Allow-Origin", "X-Requested-With", "Origin", "User-Agent", "Referer","Host"],
 )
-
 
 
 @app.get("/")

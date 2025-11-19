@@ -2,7 +2,9 @@ from sqladmin import ModelView
 from app.users.models import User, Role, Permission
 
 class AdminUser(ModelView, model=User):
-    column_list = [c.name for c in User.__table__.c if c.name != 'id'] + [User.role]
+    column_list = [c.name for c in User.__table__.c if c.name not in ('id', 'hashed_password')] + [User.role]
+    column_details_exclude_list = [User.hashed_password]
+    
     can_create = True
     can_delete = True
     can_update = True

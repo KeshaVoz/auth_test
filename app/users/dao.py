@@ -3,6 +3,7 @@ import uuid
 from app.database import async_session_maker
 from app.users.models import User, Role, RoleEnum
 from sqlalchemy import insert, select, update
+from sqlalchemy.orm import selectinload
 
 class BaseDAO:
     model = None
@@ -53,10 +54,12 @@ class UserDAO(BaseDAO):
                 raise HTTPException(status_code=500, detail='SOMETHING WRONG WITH DEFOULT USER ROLE')
             user_data['role_id'] = user_role.id
             await cls.add(**user_data)
-            user = await UserDAO.find_one_or_none(email=user_data['email'])
+            result = await session.execute(select(User).filter_by(email=user_data['email']).options(selectinload(User.role)))
+            user = result.scalars().first()
             if not user:
                 raise HTTPException(status_code=500, detail="USER CREATION FAILED")
-            user.role = user_role
+            role_in_session = await session.merge(user_role)
+            user.role = role_in_session
             session.add(user)
             await session.commit()
     
@@ -71,3 +74,11 @@ class UserDAO(BaseDAO):
 
 class RoleDAO(BaseDAO):
     model = Role
+
+    @classmethod
+    async def get_roles_with_admin_rights(cls):
+        async with async_session_maker() as session:
+            query = select(cls.model).where(
+                cls.model.name.in_([RoleEnum.SUPERUSER.value, RoleEnum.ADMIN.value]))
+            result = await session.execute(query)
+            return result.unique().scalars().all()
